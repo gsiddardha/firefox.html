@@ -16,6 +16,8 @@ define(["js/eventemitter"], function(EventEmitter) {
     }
   }
 
+  document.registerElement("browser-tab");
+
   let _iframeArray = [];
   let _selectIndex = -1;
 
@@ -32,11 +34,10 @@ define(["js/eventemitter"], function(EventEmitter) {
       _iframeParent.appendChild(iframe);
       _iframeArray.push(iframe);
 
-      if (options.select || _selectIndex < 0) {
-        this.select(iframe);
-      } else {
-        iframe.hide();
-      }
+      this.emit("add", {
+        iframe: iframe,
+        index: _iframeArray.length - 1
+      });
 
       if (options.url) {
         if (window.IS_PRIVILEGED) {
@@ -46,10 +47,11 @@ define(["js/eventemitter"], function(EventEmitter) {
         }
       }
 
-      this.emit("add", {
-        iframe: iframe,
-        index: _iframeArray.length - 1
-      });
+      if (options.select || _selectIndex < 0) {
+        this.select(iframe);
+      } else {
+        iframe.hide();
+      }
 
       return iframe;
     },
@@ -74,6 +76,10 @@ define(["js/eventemitter"], function(EventEmitter) {
         this.select(_iframeArray[newSelectIndex]);
       }
 
+      if (_selectIndex > index) {
+        _selectIndex--;
+      }
+
       _iframeArray.splice(index, 1);
       iframe.remove();
 
@@ -91,6 +97,10 @@ define(["js/eventemitter"], function(EventEmitter) {
       if (_selectIndex > -1) {
         let selectedIframe = _iframeArray[_selectIndex];
         selectedIframe.hide();
+        this.emit("unselect", {
+          iframe: selectedIframe,
+          index: _selectIndex
+        });
       }
 
       _selectIndex = index;

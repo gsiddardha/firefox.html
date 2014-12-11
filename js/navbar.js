@@ -48,3 +48,95 @@ searchinput.addEventListener("keypress", (e) => {
 });
 
 });
+  urlInputChanged: function() {
+    let urlinput = document.querySelector(".urlinput");
+    let text = urlinput.value;
+    let url = this.preprocessUrlInput(text);
+    this.selectedTab.iframe.src = url;
+    this.selectedTab.iframe.focus();
+  },
+
+  searchInputChanged: function() {
+    let searchinput = document.querySelector(".searchinput");
+    let text = searchinput.value;
+    let url = this._urlTemplate.replace('{searchTerms}', encodeURIComponent(text));
+    this.selectedTab.iframe.src = url;
+    this.selectedTab.iframe.focus();
+  },
+
+  selectedTabHasChanged: function() {
+    let tab = this.selectedTab;
+
+    document.title = "Firefox - " + tab.title;;
+
+    if (tab.loading) {
+      document.body.classList.add("loading");
+    } else {
+      document.body.classList.remove("loading");
+    }
+
+    let urlinput = document.querySelector(".urlinput");
+
+    if (tab.userInput) {
+      urlinput.value = tab.userInput;
+    } else {
+      urlinput.value = tab.location;
+    }
+
+    if (!window.IS_PRIVILEGED) {
+      return;
+    }
+
+    if (tab.securityState == "secure") {
+      document.body.classList.add("ssl");
+      if (tab.securityExtendedValidation) {
+        document.body.classList.add("sslev");
+      }
+    } else {
+      document.body.classList.remove("ssl");
+      document.body.classList.remove("sslev");
+    }
+
+    if (tab.hasIframe()) {
+      let iframe = tab.iframe;
+
+      iframe.getCanGoBack().onsuccess = r => {
+        // Make sure iframe is still selected
+        if (tab != this.selectedTab) {
+          return;
+        }
+        if (r.target.result) {
+          document.querySelector(".back-button").classList.remove("disabled");
+        } else {
+          document.querySelector(".back-button").classList.add("disabled");
+        }
+      }
+      iframe.getCanGoForward().onsuccess = r => {
+        // Make sure iframe is still selected
+        if (tab != this.selectedTab) {
+          return;
+        }
+        if (r.target.result) {
+          document.querySelector(".forward-button").classList.remove("disabled");
+        } else {
+          document.querySelector(".forward-button").classList.add("disabled");
+        }
+      }
+    } else {
+      document.querySelector(".back-button").classList.add("disabled");
+      document.querySelector(".forward-button").classList.add("disabled");
+    }
+
+  },
+
+  preprocessUrlInput: function(input) {
+    if (UrlHelper.isNotURL(input)) {
+      return this._urlTemplate.replace('{searchTerms}', encodeURIComponent(input));
+    }
+
+    if (!UrlHelper.hasScheme(input)) {
+      input = 'http://' + input;
+    }
+
+    return input;
+  },

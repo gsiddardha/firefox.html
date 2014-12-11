@@ -39,15 +39,15 @@ define([
     },
     zoomIn: function() {
       // FIXME:
-      // gBrowser.selectedTab.zoomIn();
+      // IframeDeck.getSelected().zoomIn();
     },
     zoomOut: function() {
       // FIXME:
-      // gBrowser.selectedTab.zoomOut();
+      // IframeDeck.getSelected().zoomOut();
     },
     resetZoom: function() {
       // FIXME:
-      // gBrowser.selectedTab.resetZoom();
+      // IframeDeck.getSelected().resetZoom();
     },
   }
 
