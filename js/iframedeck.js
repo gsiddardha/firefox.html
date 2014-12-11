@@ -16,8 +16,6 @@ define(["js/eventemitter"], function(EventEmitter) {
     }
   }
 
-  document.registerElement("browser-tab");
-
   let _iframeArray = [];
   let _selectIndex = -1;
 
